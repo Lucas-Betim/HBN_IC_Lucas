@@ -69,6 +69,10 @@ def score_hnb_model_accuracy(
     X = df_final.drop(columns=[class_node])
     y_true = df_final[class_node]
 
+    # Remove do dataframe colunas que não existem no modelo
+    model_nodes = set(model.nodes())
+    X = X[[col for col in X.columns if col in model_nodes]]
+
     predictions = model.predict(X, n_jobs=1)
 
     if class_node not in predictions.columns:

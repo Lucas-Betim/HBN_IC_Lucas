@@ -89,6 +89,8 @@ class HBNBuilder:
                 if self.debug:
                     print(
                         f"[HBNBuilder] Ignorando '{col}' (variável constante: card={var_card})")
+                if col in bn.nodes():
+                    bn.remove_node(col)    
                 continue
             
             values = np.full((var_card, class_card), 1.0 / var_card).tolist()
