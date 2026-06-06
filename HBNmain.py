@@ -39,18 +39,13 @@ if __name__ == "__main__":
         print(f"[ERRO] CSV não encontrado: {CSV_FILE}")
         raise SystemExit(1)
 
-    final_model, final_score, history = learn_hnb_classifier(
+    final_model, initial_score, final_score, history = learn_hnb_classifier(
         csv_file=CSV_FILE,
         class_node="class",
         kappa=2,
         max_iter=2,
         debug=True  
     )
-
-    initial_score = history[0].get("current_score", None)
-
-    if initial_score is None:
-        initial_score = final_score
 
     arquivos = gerar_relatorios_hbn(
         model=final_model,
@@ -63,6 +58,7 @@ if __name__ == "__main__":
     print("\n✓ Execução concluída")
     print(f"Score inicial: {initial_score:.6f}")
     print(f"Score final:   {final_score:.6f}")
+    print(f"Ganho:         {final_score - initial_score:+.6f}")
 
     print("\nLatentes finais:")
     for latente in final_model.latents:

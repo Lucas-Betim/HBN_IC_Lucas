@@ -285,6 +285,8 @@ def learn_hnb_classifier(
         class_node=class_node
     )
 
+    initial_score = current_score
+
     if max_iter is None:
         # no máximo n - 1 inserções, como no artigo
         max_iter = max(1, len(df_encoded.columns) - 2)
@@ -416,4 +418,9 @@ def learn_hnb_classifier(
         print(f"Score final: {current_score:.6f}")
         print("Latentes finais:", list(current_model.latents))
 
-    return current_model, current_score, history
+    return (
+    current_model,
+    initial_score,
+    current_score,
+    history
+    )
