@@ -27,7 +27,7 @@ from HBNpipeline import (
 )
 
 
-CSV_FILE = os.path.join(os.path.dirname(__file__), "mushrooms.csv")
+CSV_FILE = os.path.join(os.path.dirname(__file__), "carscat2.csv")
 
 # =========================
 # Main
@@ -42,8 +42,8 @@ if __name__ == "__main__":
     final_model, initial_score, final_score, history = learn_hnb_classifier(
         csv_file=CSV_FILE,
         class_node="class",
-        kappa=2,
-        max_iter=2,
+        kappa=5,
+        max_iter=5,
         debug=True  
     )
 

@@ -65,7 +65,7 @@ class ParameterLearner:
             "latent_card": latents,
             "n_jobs": 1,
             "atol": 0.001,
-            "max_iter": 5
+            "max_iter": 20
         }
         params.update(kwargs)
 
