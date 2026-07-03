@@ -7,7 +7,7 @@ from HBNgohari import (
 
 CSV_FILE = os.path.join(
     os.path.dirname(__file__),
-    "mushrooms.csv"
+    "Features_BIN_Cotton Disease Dataset_densenet.csv"
 )
 
 if __name__ == "__main__":
@@ -16,7 +16,7 @@ if __name__ == "__main__":
         csv_file=CSV_FILE,
         class_column="class",
         group_size=2,
-        components_range=range(2, 6),
+        components_range=range(2, 3),
         measurement="categorical",
         max_iter_em=10,
         debug=True
@@ -32,10 +32,12 @@ if __name__ == "__main__":
     print("num_latents:", best_result["num_latents"])
     print("latentes:", best_result["latent_nodes"])
 
+    base_name = os.path.splitext(os.path.basename(CSV_FILE))[0]
+
     arquivos = gerar_relatorios_gohari(
     best_result=best_result,
     resumo=resumo,
-    output_prefix="gohari"
+    output_prefix=f"gohari_{base_name}"
     )
 
     print("\n✓ Execução Gohari concluída")

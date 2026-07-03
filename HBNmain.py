@@ -46,13 +46,14 @@ if __name__ == "__main__":
         max_iter=5,
         debug=True  
     )
+    base_name = os.path.splitext(os.path.basename(CSV_FILE))[0]
 
     arquivos = gerar_relatorios_hbn(
         model=final_model,
         history=history,
         initial_score=initial_score,
         final_score=final_score,
-        output_prefix="hbn"
+        output_prefix=f"hbn_{base_name}"
     )
 
     print("\n✓ Execução concluída")
