@@ -8,17 +8,15 @@ from HBNgohari import (
     gerar_relatorios_gohari
 )
 
+from HBNutils import (
+    choose_class_column,
+    get_base_name,
+    print_section,
+    escolher_csv_em_pasta
+)
 
 def pedir_csv():
-    caminho = input("Digite o nome ou caminho do CSV: ").strip()
-
-    if not os.path.isabs(caminho):
-        caminho = os.path.join(os.path.dirname(__file__), caminho)
-
-    if not os.path.exists(caminho):
-        raise FileNotFoundError(f"CSV não encontrado: {caminho}")
-
-    return caminho
+    return escolher_csv_em_pasta(default_folder="bases")
 
 
 def nome_base(csv_file):
@@ -27,17 +25,22 @@ def nome_base(csv_file):
 
 def rodar_langseth():
     csv_file = pedir_csv()
+    class_column = choose_class_column(csv_file)
 
     kappa = int(input("kappa [padrão 5]: ") or 5)
     max_iter = int(input("max_iter Langseth [padrão 5]: ") or 5)
+    max_iter_em = int(input("max_iter EM [padrão 20]: ") or 20)
 
-    base = nome_base(csv_file)
+    base = get_base_name(csv_file)
+
+    print_section("Executando Langseth / HNB")
 
     final_model, initial_score, final_score, history = learn_hnb_classifier(
         csv_file=csv_file,
-        class_node="class",
+        class_node=class_column,
         kappa=kappa,
         max_iter=max_iter,
+        max_iter_em=max_iter_em,
         debug=True
     )
 
@@ -46,30 +49,38 @@ def rodar_langseth():
         history=history,
         initial_score=initial_score,
         final_score=final_score,
-        output_prefix=f"hbn_{base}"
+        output_prefix=f"langseth_{base}"
     )
 
     print("\n✓ Langseth concluído")
+    print(f"Base:          {base}")
+    print(f"Classe:        {class_column}")
     print(f"Score inicial: {initial_score:.6f}")
     print(f"Score final:   {final_score:.6f}")
     print(f"Ganho:         {final_score - initial_score:+.6f}")
+
     print("\nArquivos gerados:")
-    print(arquivos)
+    print(f"- {arquivos['resultado_csv']}")
+    print(f"- {arquivos['historico_csv']}")
+    print(f"- {arquivos['modelo_bif']}")
 
 
 def rodar_gohari():
     csv_file = pedir_csv()
+    class_column = choose_class_column(csv_file)
 
     group_size = int(input("group_size [padrão 2]: ") or 2)
     comp_ini = int(input("n_components inicial [padrão 2]: ") or 2)
-    comp_fim = int(input("n_components final exclusivo [padrão 6]: ") or 6)
+    comp_fim = int(input("n_components final exclusivo [padrão 3]: ") or 3)
     max_iter_em = int(input("max_iter EM [padrão 10]: ") or 10)
 
-    base = nome_base(csv_file)
+    base = get_base_name(csv_file)
+
+    print_section("Executando Gohari / NB-BLCA")
 
     results, best_result, resumo = gohari_elbow_accuracy(
         csv_file=csv_file,
-        class_column="class",
+        class_column=class_column,
         group_size=group_size,
         components_range=range(comp_ini, comp_fim),
         measurement="categorical",
@@ -84,10 +95,15 @@ def rodar_gohari():
     )
 
     print("\n✓ Gohari concluído")
+    print(f"Base:                {base}")
+    print(f"Classe:              {class_column}")
     print(f"Melhor n_components: {best_result['n_components']}")
     print(f"Score final:         {best_result['score']:.6f}")
+
     print("\nArquivos gerados:")
-    print(arquivos)
+    print(f"- {arquivos['resultado_csv']}")
+    print(f"- {arquivos['historico_csv']}")
+    print(f"- {arquivos['modelo_bif']}")
 
 
 def main():

@@ -45,10 +45,13 @@ def score_hnb_model_accuracy(
     class_node: str = "class"
 ) -> float:
     """
-    Calcula Score(H | DN).
+    Calcula acurácia do modelo.
 
-    Nesta versão, o score é a acurácia do modelo no conjunto DN.
-    Depois podemos evoluir para wrapper/cross-validation, como no artigo.
+    Versão robusta:
+    - codifica o CSV;
+    - remove colunas que não existem no modelo;
+    - remove linhas com estados não vistos pelo modelo;
+    - evita erro de índice do pgmpy em variáveis com muitos estados.
     """
 
     df_raw = pd.read_csv(csv_file)
@@ -69,11 +72,37 @@ def score_hnb_model_accuracy(
     X = df_final.drop(columns=[class_node])
     y_true = df_final[class_node]
 
-    # Remove do dataframe colunas que não existem no modelo
     model_nodes = set(model.nodes())
-    X = X[[col for col in X.columns if col in model_nodes]]
 
-    predictions = model.predict(X, n_jobs=1)
+    X = X[
+        [
+            col for col in X.columns
+            if col in model_nodes
+        ]
+    ]
+
+    valid_mask = pd.Series(True, index=X.index)
+
+    for col in X.columns:
+        cpd = model.get_cpds(col)
+
+        if cpd is None:
+            continue
+
+        max_valid_state = int(cpd.variable_card) - 1
+
+        valid_mask &= X[col].between(0, max_valid_state)
+
+    X_valid = X[valid_mask].copy()
+    y_valid = y_true[valid_mask].copy()
+
+    if len(X_valid) == 0:
+        raise ValueError(
+            "Nenhuma linha válida para predição. "
+            "Possivelmente há estados no CSV que não aparecem no modelo treinado."
+        )
+
+    predictions = model.predict(X_valid, n_jobs=1)
 
     if class_node not in predictions.columns:
         raise ValueError(
@@ -82,7 +111,13 @@ def score_hnb_model_accuracy(
 
     y_pred = predictions[class_node]
 
-    accuracy = (y_pred.values == y_true.values).mean()
+    accuracy = (y_pred.values == y_valid.values).mean()
+
+    if len(X_valid) < len(X):
+        print(
+            f"[score] Aviso: {len(X) - len(X_valid)} linhas ignoradas "
+            f"por conterem estados não vistos pelo modelo."
+        )
 
     return float(accuracy)
 
@@ -167,7 +202,8 @@ def build_candidate_model_with_max_latent(
     csv_file: str,
     candidate: dict,
     df_subset,
-    class_node: str = "class"
+    class_node: str = "class",
+    max_iter_em: int = 20
 ):
     """
     Passo 3.a.iii do artigo:
@@ -216,7 +252,8 @@ def build_candidate_model_with_max_latent(
         h_i,
         latent_nodes=all_latents,
         latent_cardinality=latent_cardinality,
-        data=df_subset
+        data=df_subset,
+        max_iter=max_iter_em
     )
 
     df_with_latent = add_latent_column_from_children(
@@ -251,6 +288,7 @@ def learn_hnb_classifier(
     class_node: str = "class",
     kappa: int = 5,
     max_iter: int | None = None,
+    max_iter_em: int = 20,
     debug: bool = True
 ):
     """
@@ -329,7 +367,8 @@ def learn_hnb_classifier(
                 csv_file=csv_file,
                 candidate=cand,
                 df_subset=subset,
-                class_node=class_node
+                class_node=class_node,
+                max_iter_em=max_iter_em
             )
 
             score = score_hnb_model_accuracy(
