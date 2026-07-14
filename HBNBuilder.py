@@ -5,24 +5,41 @@ from pgmpy.models import DiscreteBayesianNetwork
 from pgmpy.factors.discrete import TabularCPD
 
 def encode_dataframe_for_pgmpy(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Codifica todas as colunas para estados discretos 0, 1, 2, ...
+
+    Isso evita erros do pgmpy quando uma coluna vem com estados como:
+    1, 2, 3, ..., 20
+
+    O pgmpy espera índices começando em 0:
+    0, 1, 2, ..., 19
+    """
+
     df_encoded = df.copy()
 
     for col in df_encoded.columns:
-        # Categóricas (string/categorical) -> códigos inteiros
-        if df_encoded[col].dtype == "object" or pd.api.types.is_categorical_dtype(df_encoded[col]):
-            codes = df_encoded[col].astype("category").cat.codes
+        serie = df_encoded[col]
 
-            if codes.min() == -1:
-                df_encoded[col] = codes.astype(pd.Int64Dtype())
-            else:
-                df_encoded[col] = codes.astype(int)
+        if serie.isnull().any():
+            mode_val = serie.mode().iloc[0]
+            serie = serie.fillna(mode_val)
 
-        # Numéricas float mas discretas -> converte somente se forem inteiras
-        elif pd.api.types.is_float_dtype(df_encoded[col]):
-            values = df_encoded[col].dropna()
+        # Qualquer coluna object/categorical vira código
+        if (
+            serie.dtype == "object"
+            or pd.api.types.is_categorical_dtype(serie)
+        ):
+            df_encoded[col] = pd.Categorical(serie).codes.astype(int)
 
-            if values.apply(float.is_integer).all():
-                df_encoded[col] = df_encoded[col].astype(pd.Int64Dtype())
+        # Colunas numéricas também são remapeadas para 0,1,2...
+        else:
+            unique_values = sorted(serie.dropna().unique().tolist())
+            mapping = {
+                value: idx
+                for idx, value in enumerate(unique_values)
+            }
+
+            df_encoded[col] = serie.map(mapping).astype(int)
 
     return df_encoded
 
@@ -89,6 +106,8 @@ class HBNBuilder:
                 if self.debug:
                     print(
                         f"[HBNBuilder] Ignorando '{col}' (variável constante: card={var_card})")
+                if col in bn.nodes():
+                    bn.remove_node(col)    
                 continue
             
             values = np.full((var_card, class_card), 1.0 / var_card).tolist()

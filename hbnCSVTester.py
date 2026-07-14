@@ -32,6 +32,13 @@ def inferir_classe_csv(
     for _, row in df_encoded.iterrows():
         evidencia = row.drop(class_column).dropna().to_dict()
 
+        model_nodes = set(modelo.nodes())
+        evidencia = {
+            key: value
+            for key, value in evidencia.items()
+            if key in model_nodes
+        }
+
         resultado_query = infer.query(
             variables=[class_column],
             evidence=evidencia,
