@@ -1,0 +1,414 @@
+network unknown {
+}
+variable LV_1 {
+    type discrete [ 2 ] { 0, 1 };
+    property weight = None ;
+}
+variable LV_10 {
+    type discrete [ 2 ] { 0, 1 };
+    property weight = None ;
+}
+variable LV_11 {
+    type discrete [ 2 ] { 0, 1 };
+    property weight = None ;
+}
+variable LV_12 {
+    type discrete [ 2 ] { 0, 1 };
+    property weight = None ;
+}
+variable LV_13 {
+    type discrete [ 2 ] { 0, 1 };
+    property weight = None ;
+}
+variable LV_14 {
+    type discrete [ 2 ] { 0, 1 };
+    property weight = None ;
+}
+variable LV_15 {
+    type discrete [ 2 ] { 0, 1 };
+    property weight = None ;
+}
+variable LV_2 {
+    type discrete [ 2 ] { 0, 1 };
+    property weight = None ;
+}
+variable LV_3 {
+    type discrete [ 2 ] { 0, 1 };
+    property weight = None ;
+}
+variable LV_4 {
+    type discrete [ 2 ] { 0, 1 };
+    property weight = None ;
+}
+variable LV_5 {
+    type discrete [ 2 ] { 0, 1 };
+    property weight = None ;
+}
+variable LV_6 {
+    type discrete [ 2 ] { 0, 1 };
+    property weight = None ;
+}
+variable LV_7 {
+    type discrete [ 2 ] { 0, 1 };
+    property weight = None ;
+}
+variable LV_8 {
+    type discrete [ 2 ] { 0, 1 };
+    property weight = None ;
+}
+variable LV_9 {
+    type discrete [ 2 ] { 0, 1 };
+    property weight = None ;
+}
+variable attr_0 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_1 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_10 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_11 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_12 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_13 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_14 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_15 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_16 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_17 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_18 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_19 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_2 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_20 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_21 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_22 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_23 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_24 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_25 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_26 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_27 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_28 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_3 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_4 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_5 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_6 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_7 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_8 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable attr_9 {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable class {
+    type discrete [ 2 ] { 0, 1 };
+    property weight = None ;
+}
+variable path {
+    type discrete [ 2 ] { 0, 1 };
+    property weight = None ;
+}
+probability ( LV_1 | class ) {
+    ( 0 ) 0.831858407079646, 0.168141592920354;
+    ( 1 ) 0.35233160621761656, 0.6476683937823834;
+
+}
+probability ( LV_10 | class ) {
+    ( 0 ) 0.13982300884955753, 0.8601769911504424;
+    ( 1 ) 0.7694300518134715, 0.23056994818652848;
+
+}
+probability ( LV_11 | class ) {
+    ( 0 ) 0.8743362831858407, 0.1256637168141593;
+    ( 1 ) 0.572538860103627, 0.4274611398963731;
+
+}
+probability ( LV_12 | class ) {
+    ( 0 ) 0.17699115044247787, 0.8230088495575221;
+    ( 1 ) 0.7046632124352331, 0.29533678756476683;
+
+}
+probability ( LV_13 | class ) {
+    ( 0 ) 0.15221238938053097, 0.8477876106194691;
+    ( 1 ) 0.8341968911917098, 0.16580310880829016;
+
+}
+probability ( LV_14 | class ) {
+    ( 0 ) 0.3274336283185841, 0.672566371681416;
+    ( 1 ) 0.8393782383419689, 0.16062176165803108;
+
+}
+probability ( LV_15 | class ) {
+    ( 0 ) 0.6495575221238938, 0.3504424778761062;
+    ( 1 ) 0.18652849740932642, 0.8134715025906736;
+
+}
+probability ( LV_2 | class ) {
+    ( 0 ) 0.23008849557522124, 0.7699115044247787;
+    ( 1 ) 0.8756476683937824, 0.12435233160621761;
+
+}
+probability ( LV_3 | class ) {
+    ( 0 ) 0.30442477876106194, 0.695575221238938;
+    ( 1 ) 0.917098445595855, 0.08290155440414508;
+
+}
+probability ( LV_4 | class ) {
+    ( 0 ) 0.8247787610619469, 0.1752212389380531;
+    ( 1 ) 0.25129533678756477, 0.7487046632124352;
+
+}
+probability ( LV_5 | class ) {
+    ( 0 ) 0.23008849557522124, 0.7699115044247787;
+    ( 1 ) 0.8756476683937824, 0.12435233160621761;
+
+}
+probability ( LV_6 | class ) {
+    ( 0 ) 0.11858407079646018, 0.8814159292035398;
+    ( 1 ) 0.7072538860103627, 0.2927461139896373;
+
+}
+probability ( LV_7 | class ) {
+    ( 0 ) 0.8371681415929203, 0.16283185840707964;
+    ( 1 ) 0.2694300518134715, 0.7305699481865285;
+
+}
+probability ( LV_8 | class ) {
+    ( 0 ) 0.784070796460177, 0.215929203539823;
+    ( 1 ) 0.13989637305699482, 0.8601036269430051;
+
+}
+probability ( LV_9 | class ) {
+    ( 0 ) 0.9415929203539823, 0.0584070796460177;
+    ( 1 ) 0.3005181347150259, 0.6994818652849741;
+
+}
+probability ( attr_0 | LV_1 ) {
+    ( 0 ) 0.0, 0.6402640264026402, 0.35973597359735976;
+    ( 1 ) 0.9797101449275363, 0.005797101449275362, 0.014492753623188406;
+
+}
+probability ( attr_1 | LV_2 ) {
+    ( 0 ) 0.8247863247863247, 0.0876068376068376, 0.0876068376068376;
+    ( 1 ) 0.0, 0.6666666666666666, 0.3333333333333333;
+
+}
+probability ( attr_10 | LV_6 ) {
+    ( 0 ) 0.023529411764705882, 0.8352941176470589, 0.1411764705882353;
+    ( 1 ) 0.2945990180032733, 0.0, 0.7054009819967266;
+
+}
+probability ( attr_11 | LV_7 ) {
+    ( 0 ) 0.0, 0.7764298093587522, 0.22357019064124783;
+    ( 1 ) 0.6631016042780749, 0.09090909090909091, 0.24598930481283424;
+
+}
+probability ( attr_12 | LV_7 ) {
+    ( 0 ) 0.0, 0.8960138648180243, 0.10398613518197573;
+    ( 1 ) 0.5240641711229946, 0.1497326203208556, 0.32620320855614976;
+
+}
+probability ( attr_13 | LV_8 ) {
+    ( 0 ) 0.7686116700201208, 0.0, 0.23138832997987926;
+    ( 1 ) 0.13215859030837004, 0.394273127753304, 0.473568281938326;
+
+}
+probability ( attr_14 | LV_8 ) {
+    ( 0 ) 0.8511066398390342, 0.0, 0.1488933601609658;
+    ( 1 ) 0.06828193832599119, 0.6894273127753304, 0.2422907488986784;
+
+}
+probability ( attr_15 | LV_9 ) {
+    ( 0 ) 0.0, 0.8935185185185185, 0.10648148148148148;
+    ( 1 ) 0.3927392739273927, 0.0924092409240924, 0.5148514851485149;
+
+}
+probability ( attr_16 | LV_9 ) {
+    ( 0 ) 0.0, 0.7253086419753086, 0.27469135802469136;
+    ( 1 ) 0.3927392739273927, 0.033003300330033, 0.5742574257425742;
+
+}
+probability ( attr_17 | LV_10 ) {
+    ( 0 ) 0.061170212765957445, 0.6888297872340425, 0.25;
+    ( 1 ) 0.6104347826086957, 0.0, 0.38956521739130434;
+
+}
+probability ( attr_18 | LV_10 ) {
+    ( 0 ) 0.07180851063829788, 0.7659574468085106, 0.1622340425531915;
+    ( 1 ) 0.4817391304347826, 0.0, 0.5182608695652174;
+
+}
+probability ( attr_19 | LV_11 ) {
+    ( 0 ) 0.0, 0.9272727272727272, 0.07272727272727272;
+    ( 1 ) 0.2584745762711864, 0.2627118644067797, 0.4788135593220339;
+
+}
+probability ( attr_2 | LV_2 ) {
+    ( 0 ) 0.5918803418803419, 0.15598290598290598, 0.25213675213675213;
+    ( 1 ) 0.0, 0.6231884057971014, 0.37681159420289856;
+
+}
+probability ( attr_20 | LV_11 ) {
+    ( 0 ) 0.0, 0.8447552447552448, 0.15524475524475526;
+    ( 1 ) 0.7245762711864406, 0.012711864406779662, 0.2627118644067797;
+
+}
+probability ( attr_21 | LV_12 ) {
+    ( 0 ) 0.22043010752688172, 0.2956989247311828, 0.4838709677419355;
+    ( 1 ) 0.9309153713298791, 0.0, 0.0690846286701209;
+
+}
+probability ( attr_22 | LV_12 ) {
+    ( 0 ) 0.013440860215053764, 0.7553763440860215, 0.23118279569892472;
+    ( 1 ) 0.5993091537132987, 0.0, 0.4006908462867012;
+
+}
+probability ( attr_23 | LV_13 ) {
+    ( 0 ) 0.6519607843137255, 0.09068627450980392, 0.25735294117647056;
+    ( 1 ) 0.0, 0.8360957642725598, 0.16390423572744015;
+
+}
+probability ( attr_24 | LV_13 ) {
+    ( 0 ) 0.1715686274509804, 0.5343137254901961, 0.29411764705882354;
+    ( 1 ) 0.8434622467771639, 0.0, 0.15653775322283608;
+
+}
+probability ( attr_25 | LV_14 ) {
+    ( 0 ) 0.5834970530451866, 0.0, 0.4165029469548134;
+    ( 1 ) 0.0, 0.5588235294117647, 0.4411764705882353;
+
+}
+probability ( attr_26 | LV_14 ) {
+    ( 0 ) 0.4066797642436149, 0.13359528487229863, 0.45972495088408644;
+    ( 1 ) 0.05203619909502263, 0.8506787330316742, 0.09728506787330317;
+
+}
+probability ( attr_27 | LV_15 ) {
+    ( 0 ) 0.0, 0.8223234624145785, 0.1776765375854214;
+    ( 1 ) 0.255859375, 0.55859375, 0.185546875;
+
+}
+probability ( attr_28 | LV_15 ) {
+    ( 0 ) 0.0, 1.0, 0.0;
+    ( 1 ) 0.296875, 0.056640625, 0.646484375;
+
+}
+probability ( attr_3 | LV_3 ) {
+    ( 0 ) 0.8212927756653993, 0.0, 0.17870722433460076;
+    ( 1 ) 0.0, 0.7482352941176471, 0.25176470588235295;
+
+}
+probability ( attr_4 | LV_3 ) {
+    ( 0 ) 0.27566539923954375, 0.46387832699619774, 0.26045627376425856;
+    ( 1 ) 0.7482352941176471, 0.13647058823529412, 0.11529411764705882;
+
+}
+probability ( attr_5 | LV_4 ) {
+    ( 0 ) 0.0, 0.8294849023090586, 0.1705150976909414;
+    ( 1 ) 0.6314432989690721, 0.2036082474226804, 0.16494845360824742;
+
+}
+probability ( attr_6 | LV_4 ) {
+    ( 0 ) 0.0, 0.6003552397868561, 0.3996447602131439;
+    ( 1 ) 0.8634020618556701, 0.02577319587628866, 0.11082474226804123;
+
+}
+probability ( attr_7 | LV_5 ) {
+    ( 0 ) 0.5918803418803419, 0.27136752136752135, 0.13675213675213677;
+    ( 1 ) 0.0, 0.7971014492753623, 0.2028985507246377;
+
+}
+probability ( attr_8 | LV_5 ) {
+    ( 0 ) 0.038461538461538464, 0.8504273504273504, 0.1111111111111111;
+    ( 1 ) 0.5548654244306418, 0.0, 0.4451345755693582;
+
+}
+probability ( attr_9 | LV_6 ) {
+    ( 0 ) 0.37058823529411766, 0.29411764705882354, 0.3352941176470588;
+    ( 1 ) 0.0, 0.7004909983633388, 0.2995090016366612;
+
+}
+probability ( class ) {
+    table 0.594111461619348, 0.4058885383806519 ;
+}
+probability ( path | LV_1 ) {
+    ( 0 ) 1.0, 0.0;
+    ( 1 ) 0.9217391304347826, 0.0782608695652174;
+
+}

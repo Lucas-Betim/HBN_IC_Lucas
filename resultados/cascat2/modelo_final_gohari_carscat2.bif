@@ -1,0 +1,96 @@
+network unknown {
+}
+variable BUY {
+    type discrete [ 4 ] { 0, 1, 2, 3 };
+    property weight = None ;
+}
+variable Doors {
+    type discrete [ 4 ] { 0, 1, 2, 3 };
+    property weight = None ;
+}
+variable LV_1 {
+    type discrete [ 2 ] { 0, 1 };
+    property weight = None ;
+}
+variable LV_2 {
+    type discrete [ 2 ] { 0, 1 };
+    property weight = None ;
+}
+variable LV_3 {
+    type discrete [ 2 ] { 0, 1 };
+    property weight = None ;
+}
+variable Lug {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable MNT {
+    type discrete [ 4 ] { 0, 1, 2, 3 };
+    property weight = None ;
+}
+variable Persons {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable Safe {
+    type discrete [ 3 ] { 0, 1, 2 };
+    property weight = None ;
+}
+variable class {
+    type discrete [ 4 ] { 0, 1, 2, 3 };
+    property weight = None ;
+}
+probability ( BUY | LV_1 ) {
+    ( 0 ) 0.3333333333333333, 0.4444444444444444, 0.2222222222222222, 0.0;
+    ( 1 ) 0.14285714285714285, 0.0, 0.2857142857142857, 0.5714285714285714;
+
+}
+probability ( Doors | LV_2 ) {
+    ( 0 ) 0.42857142857142855, 0.14285714285714285, 0.0, 0.42857142857142855;
+    ( 1 ) 0.0, 0.4, 0.6, 0.0;
+
+}
+probability ( LV_1 | class ) {
+    ( 0 ) 0.6067708333333334, 0.3932291666666667;
+    ( 1 ) 0.6666666666666666, 0.3333333333333333;
+    ( 2 ) 0.540495867768595, 0.45950413223140496;
+    ( 3 ) 0.6, 0.4;
+
+}
+probability ( LV_2 | class ) {
+    ( 0 ) 0.6484375, 0.3515625;
+    ( 1 ) 0.6521739130434783, 0.34782608695652173;
+    ( 2 ) 0.5570247933884298, 0.44297520661157025;
+    ( 3 ) 0.6153846153846154, 0.38461538461538464;
+
+}
+probability ( LV_3 | class ) {
+    ( 0 ) 0.3645833333333333, 0.6354166666666666;
+    ( 1 ) 0.43478260869565216, 0.5652173913043478;
+    ( 2 ) 0.6322314049586777, 0.3677685950413223;
+    ( 3 ) 0.38461538461538464, 0.6153846153846154;
+
+}
+probability ( Lug | LV_3 ) {
+    ( 0 ) 0.2, 0.4, 0.4;
+    ( 1 ) 0.5, 0.25, 0.25;
+
+}
+probability ( MNT | LV_1 ) {
+    ( 0 ) 0.3333333333333333, 0.1111111111111111, 0.2222222222222222, 0.3333333333333333;
+    ( 1 ) 0.14285714285714285, 0.42857142857142855, 0.2857142857142857, 0.14285714285714285;
+
+}
+probability ( Persons | LV_2 ) {
+    ( 0 ) 0.2857142857142857, 0.2857142857142857, 0.42857142857142855;
+    ( 1 ) 0.4, 0.4, 0.2;
+
+}
+probability ( Safe | LV_3 ) {
+    ( 0 ) 0.4, 0.6, 0.0;
+    ( 1 ) 0.25, 0.0, 0.75;
+
+}
+probability ( class ) {
+    table 0.2222222222222222, 0.03993055555555555, 0.7002314814814815, 0.03761574074074074 ;
+}

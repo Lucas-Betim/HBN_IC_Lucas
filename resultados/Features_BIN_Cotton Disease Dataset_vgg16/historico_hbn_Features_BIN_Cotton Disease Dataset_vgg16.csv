@@ -1,0 +1,3 @@
+iteracao,aceita,latente,par,score,cardinalidade_inicial,cardinalidade_final,numero_colapsos,score_atual
+0,True,L_attr_3_attr_5,"('attr_3', 'attr_5')",0.9274406332453826,9,2,7,
+1,False,,,0.8355263157894737,,,0,0.9274406332453826
