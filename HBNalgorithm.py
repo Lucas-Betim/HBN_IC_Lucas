@@ -380,7 +380,8 @@ def propose_latent_variable_with_state_space(
 def add_latent_column_from_children(
     df_subset: pd.DataFrame,
     child_vars: tuple[str, ...],
-    latent_name: str
+    latent_name: str,
+    state_spaces: dict[str, list] | None = None
 ) -> pd.DataFrame:
     """
     Cria uma coluna da latente no dataframe a partir das combinações dos filhos.
@@ -396,16 +397,28 @@ def add_latent_column_from_children(
     """
     df_tmp = df_subset.copy()
 
-    state_spaces = []
+    child_state_spaces = []
     for var in child_vars:
-        values = sorted(df_tmp[var].dropna().unique().tolist())
-        state_spaces.append(values)
+        if state_spaces is None:
+            values = sorted(df_tmp[var].dropna().unique().tolist())
+        else:
+            if var not in state_spaces:
+                raise ValueError(
+                    f"Espaço de estados não informado para '{var}'."
+                )
+            values = list(state_spaces[var])
+        child_state_spaces.append(values)
 
-    combinations = list(itertools.product(*state_spaces))
+    combinations = list(itertools.product(*child_state_spaces))
     combo_to_state = {combo: idx for idx, combo in enumerate(combinations)}
 
     def map_row_to_state(row):
         combo = tuple(row[var] for var in child_vars)
+        if combo not in combo_to_state:
+            raise ValueError(
+                f"Combinação {combo} não pertence ao espaço de estados "
+                f"definido para a latente '{latent_name}'."
+            )
         return combo_to_state[combo]
 
     df_tmp[latent_name] = df_tmp.apply(map_row_to_state, axis=1)

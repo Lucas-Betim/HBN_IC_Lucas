@@ -9,8 +9,14 @@ from HBNalgorithm import (
     get_max_latent_cardinality,
     add_latent_column_from_children
 )
-from HBNstatecollapse import collapse_latent_states_by_mdl
-from HBNBuilder import encode_dataframe_for_pgmpy
+from HBNstatecollapse import (
+    collapse_latent_states_by_mdl,
+    apply_latent_collapse_history
+)
+from HBNBuilder import (
+    encode_dataframe_for_pgmpy,
+    transform_dataframe_with_state_mappings
+)
 
 # =========================
 # Setup comum
@@ -39,13 +45,15 @@ def build_and_train(csv_file: str):
     return hnb_trained, _df_final
 
 
-def score_hnb_model_accuracy(
+def predict_hnb_model(
     model,
     csv_file: str,
-    class_node: str = "class"
-) -> float:
+    class_node: str = "class",
+    state_mappings: dict | None = None,
+    require_all_rows: bool = False
+) -> tuple[pd.Series, pd.Series]:
     """
-    Calcula acurácia do modelo.
+    Retorna as classes reais e preditas nas linhas válidas do CSV.
 
     Versão robusta:
     - codifica o CSV;
@@ -57,20 +65,25 @@ def score_hnb_model_accuracy(
     df_raw = pd.read_csv(csv_file)
     df_raw.columns = df_raw.columns.str.strip()
 
-    df_encoded = encode_dataframe_for_pgmpy(df_raw)
+    if state_mappings is None:
+        df_encoded = encode_dataframe_for_pgmpy(df_raw)
+    else:
+        df_encoded = transform_dataframe_with_state_mappings(
+            df_raw,
+            state_mappings
+        )
 
-    for col in df_encoded.columns:
-        if df_encoded[col].isnull().any():
-            mode_val = df_encoded[col].mode().iloc[0]
-            df_encoded[col] = df_encoded[col].fillna(mode_val)
+    if state_mappings is None:
+        for col in df_encoded.columns:
+            if df_encoded[col].isnull().any():
+                mode_val = df_encoded[col].mode().iloc[0]
+                df_encoded[col] = df_encoded[col].fillna(mode_val)
 
-    df_final = df_encoded.astype(int)
-
-    if class_node not in df_final.columns:
+    if class_node not in df_encoded.columns:
         raise ValueError(f"Coluna de classe '{class_node}' não encontrada.")
 
-    X = df_final.drop(columns=[class_node])
-    y_true = df_final[class_node]
+    X = df_encoded.drop(columns=[class_node])
+    y_true = df_encoded[class_node]
 
     model_nodes = set(model.nodes())
 
@@ -81,7 +94,7 @@ def score_hnb_model_accuracy(
         ]
     ]
 
-    valid_mask = pd.Series(True, index=X.index)
+    valid_mask = X.notnull().all(axis=1) & y_true.notnull()
 
     for col in X.columns:
         cpd = model.get_cpds(col)
@@ -93,13 +106,20 @@ def score_hnb_model_accuracy(
 
         valid_mask &= X[col].between(0, max_valid_state)
 
-    X_valid = X[valid_mask].copy()
-    y_valid = y_true[valid_mask].copy()
+    X_valid = X[valid_mask].copy().astype(int)
+    y_valid = y_true[valid_mask].copy().astype(int)
 
     if len(X_valid) == 0:
         raise ValueError(
             "Nenhuma linha válida para predição. "
             "Possivelmente há estados no CSV que não aparecem no modelo treinado."
+        )
+
+    if require_all_rows and len(X_valid) < len(X):
+        raise ValueError(
+            f"A avaliação descartaria {len(X) - len(X_valid)} de "
+            f"{len(X)} linhas por conter estados não vistos no treino. "
+            "A acurácia não foi calculada para evitar um resultado enviesado."
         )
 
     predictions = model.predict(X_valid, n_jobs=1)
@@ -111,15 +131,35 @@ def score_hnb_model_accuracy(
 
     y_pred = predictions[class_node]
 
-    accuracy = (y_pred.values == y_valid.values).mean()
-
     if len(X_valid) < len(X):
         print(
             f"[score] Aviso: {len(X) - len(X_valid)} linhas ignoradas "
             f"por conterem estados não vistos pelo modelo."
         )
 
-    return float(accuracy)
+    return (
+        y_valid.reset_index(drop=True),
+        y_pred.reset_index(drop=True)
+    )
+
+
+def score_hnb_model_accuracy(
+    model,
+    csv_file: str,
+    class_node: str = "class",
+    state_mappings: dict | None = None,
+    require_all_rows: bool = False
+) -> float:
+    """Calcula a acurácia usando as predições válidas do modelo."""
+
+    y_true, y_pred = predict_hnb_model(
+        model=model,
+        csv_file=csv_file,
+        class_node=class_node,
+        state_mappings=state_mappings,
+        require_all_rows=require_all_rows
+    )
+    return float((y_pred.values == y_true.values).mean())
 
 
 def get_candidate_latents_from_original_nb(csv_file: str):
@@ -203,7 +243,9 @@ def build_candidate_model_with_max_latent(
     candidate: dict,
     df_subset,
     class_node: str = "class",
-    max_iter_em: int = 20
+    max_iter_em: int = 20,
+    observed_state_names: dict | None = None,
+    latent_state_spaces: dict[str, list] | None = None
 ):
     """
     Passo 3.a.iii do artigo:
@@ -214,7 +256,8 @@ def build_candidate_model_with_max_latent(
       2) copia Hk para formar H(i)
       3) calcula cardinalidade máxima inicial de L(i)
       4) insere L(i) em H(i)
-      5) treina parâmetros via EM
+      5) treina parâmetros via EM no subconjunto, preservando todos os
+         estados observados no treino completo da dobra
       6) colapsa estados via Delta MDL
       7) retorna H(i) final
     """
@@ -229,10 +272,15 @@ def build_candidate_model_with_max_latent(
     pair = candidate["pair"]
     latent_name = candidate["latent_name"]
 
-    latent_cardinality = get_max_latent_cardinality(
-        df_subset=df_subset,
-        child_vars=pair
-    )
+    if latent_state_spaces is None:
+        latent_cardinality = get_max_latent_cardinality(
+            df_subset=df_subset,
+            child_vars=pair
+        )
+    else:
+        latent_cardinality = 1
+        for child in pair:
+            latent_cardinality *= len(latent_state_spaces[child])
 
     # 3.a.iii: define H(i) incluindo L(i) em Hk
     h_i.change_bn_topology(
@@ -253,13 +301,15 @@ def build_candidate_model_with_max_latent(
         latent_nodes=all_latents,
         latent_cardinality=latent_cardinality,
         data=df_subset,
+        state_names=observed_state_names,
         max_iter=max_iter_em
     )
 
     df_with_latent = add_latent_column_from_children(
         df_subset=df_subset,
         child_vars=pair,
-        latent_name=latent_name
+        latent_name=latent_name,
+        state_spaces=latent_state_spaces
     )
 
     h_i_reduced, collapse_history = collapse_latent_states_by_mdl(
@@ -289,7 +339,8 @@ def learn_hnb_classifier(
     kappa: int = 5,
     max_iter: int | None = None,
     max_iter_em: int = 20,
-    debug: bool = True
+    debug: bool = True,
+    progress_label: str | None = None
 ):
     """
     Implementa o loop principal do Algoritmo 3:
@@ -316,6 +367,10 @@ def learn_hnb_classifier(
         debug=False
     )
     current_df = df_encoded.fillna(0).astype(int).copy()
+    observed_state_names = {
+        col: sorted(df_encoded[col].dropna().unique().tolist())
+        for col in df_encoded.columns
+    }
 
     current_score = score_hnb_model_accuracy(
         model=current_model,
@@ -346,6 +401,12 @@ def learn_hnb_classifier(
         candidate_latents = []
 
         for i, subset in enumerate(subsets, start=1):
+            if progress_label is not None:
+                print(
+                    f"[{progress_label}] Iteração {k + 1}/{max_iter} | "
+                    f"candidato {i}/{len(subsets)}"
+                )
+
             cand = select_candidate_latent_variable_v2(
                 current_model,
                 subset,
@@ -355,6 +416,11 @@ def learn_hnb_classifier(
 
             if cand is None:
                 continue
+
+            latent_state_spaces = {
+                child: sorted(current_df[child].dropna().unique().tolist())
+                for child in cand["pair"]
+            }
 
             (
                 h_i_reduced,
@@ -368,7 +434,9 @@ def learn_hnb_classifier(
                 candidate=cand,
                 df_subset=subset,
                 class_node=class_node,
-                max_iter_em=max_iter_em
+                max_iter_em=max_iter_em,
+                observed_state_names=observed_state_names,
+                latent_state_spaces=latent_state_spaces
             )
 
             score = score_hnb_model_accuracy(
@@ -385,6 +453,7 @@ def learn_hnb_classifier(
             cand["model"] = h_i_reduced
             cand["score"] = float(score)
             cand["df_with_latent"] = df_with_latent
+            cand["latent_state_spaces"] = latent_state_spaces
 
             candidate_latents.append(cand)
 
@@ -417,7 +486,20 @@ def learn_hnb_classifier(
         if best_score > current_score:
             current_model = best_candidate["model"]
             current_score = best_score
-            current_df = best_candidate["df_with_latent"].copy()
+            # Mantém todas as linhas de D_N entre as iterações. O subconjunto
+            # vencedor serve para construir o candidato, não para substituir
+            # a base completa usada na iteração seguinte.
+            current_df = add_latent_column_from_children(
+                df_subset=current_df,
+                child_vars=best_candidate["pair"],
+                latent_name=best_candidate["latent_name"],
+                state_spaces=best_candidate["latent_state_spaces"]
+            )
+            current_df = apply_latent_collapse_history(
+                df_with_latent=current_df,
+                latent_node=best_candidate["latent_name"],
+                collapse_history=best_candidate["collapse_history"]
+            )
 
             history.append({
                 "iteration": k,

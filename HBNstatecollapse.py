@@ -302,6 +302,8 @@ def collapse_latent_states_by_mdl(
         history.append({
             "latent_node": latent_node,
             "merged_pair": (li_name, lj_name),
+            "merged_indices": (int(state_i), int(state_j)),
+            "cardinality_before": old_cardinality,
             "delta": float(best_delta),
             "cardinality_after": int(model.get_cpds(latent_node).variable_card)
         })
@@ -310,6 +312,33 @@ def collapse_latent_states_by_mdl(
             break
 
     return model, history
+
+
+def apply_latent_collapse_history(
+    df_with_latent: pd.DataFrame,
+    latent_node: str,
+    collapse_history: list[dict]
+) -> pd.DataFrame:
+    """Aplica a uma coluna latente os mesmos colapsos aceitos no modelo."""
+    df_updated = df_with_latent.copy()
+
+    for collapse in collapse_history:
+        if "merged_indices" not in collapse or "cardinality_before" not in collapse:
+            raise ValueError(
+                "Histórico de colapso sem os índices necessários para "
+                "atualizar a base completa."
+            )
+
+        state_i, state_j = collapse["merged_indices"]
+        df_updated = atualizar_coluna_latente_apos_colapso(
+            df_with_latent=df_updated,
+            latent_node=latent_node,
+            idx_i=int(state_i),
+            idx_j=int(state_j),
+            old_cardinality=int(collapse["cardinality_before"])
+        )
+
+    return df_updated
 
 
 def atualizar_coluna_latente_apos_colapso(

@@ -1,0 +1,43 @@
+# Python: arquivos compilados e caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Ambientes virtuais e configuração local
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+
+# IDE e sistema operacional
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Arquivos temporários e logs
+*.log
+*.tmp
+*.temp
+*.bak
+~$*
+
+# Execuções rápidas de validação
+_smoke_cv/
+
+# Script local legado que desliga o computador ao final
+/executar_16_bases_e_desligar.ps1
+
+# Resultados e modelos gerados pelos experimentos
+resultados/
+resultados_*/
+*.bif
+

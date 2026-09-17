@@ -7,7 +7,9 @@ def gerar_relatorios_hbn(
     history: list,
     initial_score: float,
     final_score: float,
-    output_prefix: str = "hbn"
+    output_prefix: str = "hbn",
+    bootstrap_result: dict | None = None,
+    run_config: dict | None = None
 ):
     """
     Gera arquivos finais da execução HBN:
@@ -29,6 +31,21 @@ def gerar_relatorios_hbn(
         "numero_latentes_finais": len(latentes_finais),
         "latentes_finais": "; ".join(latentes_finais)
     }
+
+    if bootstrap_result is not None:
+        resultado.update({
+            "versao_avaliacao": bootstrap_result["evaluation_version"],
+            "protocolo_avaliacao": "holdout_bootstrap",
+            "acuracia_holdout": bootstrap_result["accuracy_holdout"],
+            "acuracia_media_bootstrap": bootstrap_result["accuracy_mean"],
+            "desvio_padrao_acuracia_bootstrap": bootstrap_result["accuracy_std"],
+            "numero_repeticoes_bootstrap": bootstrap_result["n_bootstrap"],
+            "proporcao_teste": bootstrap_result["test_size"],
+            "numero_amostras_teste": bootstrap_result["n_test"]
+        })
+
+    if run_config is not None:
+        resultado.update(run_config)
 
     df_resultado = pd.DataFrame([resultado])
     arquivo_resultado = f"resultado_{output_prefix}.csv"
@@ -57,6 +74,13 @@ def gerar_relatorios_hbn(
     arquivo_historico = f"historico_{output_prefix}.csv"
     df_historico.to_csv(arquivo_historico, index=False)
 
+    arquivo_bootstrap = None
+    if bootstrap_result is not None:
+        arquivo_bootstrap = f"bootstrap_{output_prefix}.csv"
+        bootstrap_result["bootstrap_results"].to_csv(
+            arquivo_bootstrap, index=False
+        )
+
     # =========================
     # 3. Exportar modelo BIF
     # =========================
@@ -68,5 +92,7 @@ def gerar_relatorios_hbn(
     return {
         "resultado_csv": arquivo_resultado,
         "historico_csv": arquivo_historico,
+        "bootstrap_csv": arquivo_bootstrap,
+        "avaliacao_csv": arquivo_bootstrap,
         "modelo_bif": arquivo_bif
     }
