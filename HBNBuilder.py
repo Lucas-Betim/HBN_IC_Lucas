@@ -4,6 +4,74 @@ import pandas as pd
 from pgmpy.models import DiscreteBayesianNetwork
 from pgmpy.factors.discrete import TabularCPD
 
+
+NON_FEATURE_COLUMNS = {"path"}
+
+
+def drop_non_feature_columns(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Remove colunas de identificação que não são atributos preditivos.
+
+    ``path`` possui praticamente um valor diferente por imagem nas bases
+    Features_BIN. Tratá-la como variável categórica cria estados que não
+    existem no treino e invalida a avaliação do conjunto de teste.
+    """
+    columns_to_drop = [
+        col for col in df.columns
+        if col.strip().lower() in NON_FEATURE_COLUMNS
+    ]
+    return df.drop(columns=columns_to_drop)
+
+
+def fit_state_mappings(df: pd.DataFrame) -> dict:
+    """Aprende nos dados de treino o código inteiro de cada estado."""
+    mappings = {}
+
+    for col in df.columns:
+        serie = df[col]
+        fill_value = serie.mode().iloc[0] if serie.isnull().any() else None
+
+        if fill_value is not None:
+            serie = serie.fillna(fill_value)
+
+        if (
+            serie.dtype == "object"
+            or isinstance(serie.dtype, pd.CategoricalDtype)
+        ):
+            values = pd.Categorical(serie).categories.tolist()
+        else:
+            values = sorted(serie.dropna().unique().tolist())
+
+        mappings[col] = {
+            "fill_value": fill_value,
+            "mapping": {value: idx for idx, value in enumerate(values)}
+        }
+
+    return mappings
+
+
+def transform_dataframe_with_state_mappings(
+    df: pd.DataFrame,
+    state_mappings: dict
+) -> pd.DataFrame:
+    """Aplica a um dataframe o mapeamento aprendido no treino."""
+    encoded = pd.DataFrame(index=df.index)
+
+    for col in df.columns:
+        if col not in state_mappings:
+            continue
+
+        serie = df[col]
+        fill_value = state_mappings[col]["fill_value"]
+
+        if fill_value is not None:
+            serie = serie.fillna(fill_value)
+
+        encoded[col] = serie.map(state_mappings[col]["mapping"])
+
+    return encoded
+
+
 def encode_dataframe_for_pgmpy(df: pd.DataFrame) -> pd.DataFrame:
     """
     Codifica todas as colunas para estados discretos 0, 1, 2, ...
@@ -15,33 +83,12 @@ def encode_dataframe_for_pgmpy(df: pd.DataFrame) -> pd.DataFrame:
     0, 1, 2, ..., 19
     """
 
-    df_encoded = df.copy()
-
-    for col in df_encoded.columns:
-        serie = df_encoded[col]
-
-        if serie.isnull().any():
-            mode_val = serie.mode().iloc[0]
-            serie = serie.fillna(mode_val)
-
-        # Qualquer coluna object/categorical vira código
-        if (
-            serie.dtype == "object"
-            or pd.api.types.is_categorical_dtype(serie)
-        ):
-            df_encoded[col] = pd.Categorical(serie).codes.astype(int)
-
-        # Colunas numéricas também são remapeadas para 0,1,2...
-        else:
-            unique_values = sorted(serie.dropna().unique().tolist())
-            mapping = {
-                value: idx
-                for idx, value in enumerate(unique_values)
-            }
-
-            df_encoded[col] = serie.map(mapping).astype(int)
-
-    return df_encoded
+    df = drop_non_feature_columns(df)
+    mappings = fit_state_mappings(df)
+    return transform_dataframe_with_state_mappings(
+        df,
+        mappings
+    ).astype(int)
 
 # ============================================================
 # Builder: carrega CSV + encode + cria NB inicial
@@ -130,4 +177,3 @@ class HBNBuilder:
 
 
 
-    

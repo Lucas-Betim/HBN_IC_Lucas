@@ -61,6 +61,8 @@ def create_gohari_latent_variables_with_stepmix(
     n_components: int = 2,
     measurement: str = "categorical",
     random_state: int = 42,
+    n_init: int = 1,
+    stepmix_max_iter: int = 1000,
     debug: bool = True
 ):
     df_raw = pd.read_csv(csv_file)
@@ -120,6 +122,8 @@ def create_gohari_latent_variables_with_stepmix(
             n_components=n_components,
             measurement=measurement,
             random_state=random_state,
+            n_init=n_init,
+            max_iter=stepmix_max_iter,
             verbose=0
         )
 
@@ -357,6 +361,8 @@ def run_gohari_once(
     measurement: str = "categorical",
     max_iter_em: int = 10,
     random_state: int = 42,
+    n_init: int = 1,
+    stepmix_max_iter: int = 1000,
     debug: bool = True
 ):
     """
@@ -374,6 +380,8 @@ def run_gohari_once(
         n_components=n_components,
         measurement=measurement,
         random_state=random_state,
+        n_init=n_init,
+        stepmix_max_iter=stepmix_max_iter,
         debug=debug
     )
 
@@ -401,6 +409,8 @@ def run_gohari_once(
     result = {
         "n_components": n_components,
         "group_size": group_size,
+        "stepmix_n_init": n_init,
+        "stepmix_max_iter": stepmix_max_iter,
         "score": score,
         "num_latents": len(latent_nodes),
         "latent_nodes": latent_nodes,
@@ -420,7 +430,10 @@ def gohari_elbow_accuracy(
     measurement: str = "categorical",
     max_iter_em: int = 10,
     random_state: int = 42,
-    debug: bool = True
+    n_init: int = 1,
+    stepmix_max_iter: int = 1000,
+    debug: bool = True,
+    save_elbow_csv: bool = True
 ):
     results = []
 
@@ -439,6 +452,8 @@ def gohari_elbow_accuracy(
                 measurement=measurement,
                 max_iter_em=max_iter_em,
                 random_state=random_state,
+                n_init=n_init,
+                stepmix_max_iter=stepmix_max_iter,
                 debug=debug
             )
 
@@ -474,7 +489,8 @@ def gohari_elbow_accuracy(
         for r in results
     ])
 
-    resumo.to_csv("resultado_gohari_elbow.csv", index=False)
+    if save_elbow_csv:
+        resumo.to_csv("resultado_gohari_elbow.csv", index=False)
 
     return results, best_result, resumo
 
@@ -482,7 +498,9 @@ from pgmpy.readwrite import BIFWriter
 def gerar_relatorios_gohari(
     best_result: dict,
     resumo: pd.DataFrame,
-    output_prefix: str = "gohari"
+    output_prefix: str = "gohari",
+    bootstrap_result: dict | None = None,
+    run_config: dict | None = None
 ):
     """
     Gera arquivos finais do método Gohari:
@@ -501,6 +519,21 @@ def gerar_relatorios_gohari(
         "latentes": "; ".join(best_result["latent_nodes"])
     }
 
+    if bootstrap_result is not None:
+        resultado.update({
+            "versao_avaliacao": bootstrap_result["evaluation_version"],
+            "protocolo_avaliacao": "holdout_bootstrap",
+            "acuracia_holdout": bootstrap_result["accuracy_holdout"],
+            "acuracia_media_bootstrap": bootstrap_result["accuracy_mean"],
+            "desvio_padrao_acuracia_bootstrap": bootstrap_result["accuracy_std"],
+            "numero_repeticoes_bootstrap": bootstrap_result["n_bootstrap"],
+            "proporcao_teste": bootstrap_result["test_size"],
+            "numero_amostras_teste": bootstrap_result["n_test"]
+        })
+
+    if run_config is not None:
+        resultado.update(run_config)
+
     df_resultado = pd.DataFrame([resultado])
 
     arquivo_resultado = f"resultado_{output_prefix}.csv"
@@ -510,11 +543,20 @@ def gerar_relatorios_gohari(
     df_resultado.to_csv(arquivo_resultado, index=False)
     resumo.to_csv(arquivo_historico, index=False)
 
+    arquivo_bootstrap = None
+    if bootstrap_result is not None:
+        arquivo_bootstrap = f"bootstrap_{output_prefix}.csv"
+        bootstrap_result["bootstrap_results"].to_csv(
+            arquivo_bootstrap, index=False
+        )
+
     writer = BIFWriter(model)
     writer.write_bif(arquivo_bif)
 
     return {
         "resultado_csv": arquivo_resultado,
         "historico_csv": arquivo_historico,
+        "bootstrap_csv": arquivo_bootstrap,
+        "avaliacao_csv": arquivo_bootstrap,
         "modelo_bif": arquivo_bif
     }

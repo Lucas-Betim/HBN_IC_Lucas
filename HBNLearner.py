@@ -48,7 +48,14 @@ class ParameterLearner:
             print("  Linhas:", len(df_final),
                   "| Colunas:", list(df_final.columns))
 
-        estimator = ExpectationMaximization(bn, df_final)
+        # ``state_names`` pode incluir estados observados que não aparecem
+        # no subconjunto atual, mas existem no treino completo da dobra.
+        state_names = kwargs.pop("state_names", None)
+        estimator = ExpectationMaximization(
+            bn,
+            df_final,
+            state_names=state_names
+        )
 
         # cardinalidades dos latentes
         latents = {}
